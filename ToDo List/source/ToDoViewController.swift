@@ -13,11 +13,11 @@ class ToDoViewController: UITableViewController {
     
     //Navigator button ADD
     @IBAction func addItem(_ sender: UIBarButtonItem) {
-        let newRowIndex: Int = todoList.todos.count
+        let newRowIndex = todoList.todos.count
         _ = todoList.newTodo()
         
-        let indexPath: IndexPath = IndexPath(row: newRowIndex, section: 0)
-        let indexPaths: [IndexPath] = [indexPath]
+        let indexPath = IndexPath(row: newRowIndex, section: 0)
+        let indexPaths = [indexPath]
 
         tableView.insertRows(at: indexPaths, with: .automatic)
     }
@@ -61,7 +61,7 @@ class ToDoViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "ToDoItem", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItem", for: indexPath)
         let item: TodoListItem = todoList.todos[indexPath.row]
         
         //Configure text labels in cell
@@ -84,8 +84,9 @@ class ToDoViewController: UITableViewController {
         }
     }
 
+    //Set for swipe right->left
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        let indexPaths: [IndexPath] = [indexPath]
+        let indexPaths = [indexPath]
 
         //Remove todoitem from array
         todoList.todos.remove(at: indexPath.row)
@@ -96,14 +97,14 @@ class ToDoViewController: UITableViewController {
     
     //Set for swipe left->right
     override func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let complete: UIContextualAction = UIContextualAction(style: .normal, title: "Finish") { (action, view, completion) in
+        let complete = UIContextualAction(style: .destructive, title: "✔️") { (action, view, completion) in
             self.todoList.todos.remove(at: indexPath.row)
             self.tableView.deleteRows(at: [indexPath], with: .automatic)
             completion(true)
         }
         
         complete.backgroundColor = .green
-        let action: UISwipeActionsConfiguration = UISwipeActionsConfiguration(actions: [complete])
+        let action = UISwipeActionsConfiguration(actions: [complete])
         return action
     }
 }

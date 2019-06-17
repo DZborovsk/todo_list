@@ -11,16 +11,12 @@ import Foundation
 class TodoList {
     var todos: [TodoListItem] = []
     
-    
-    
-    
-    
     init() {
-        let row0Item: TodoListItem = TodoListItem()
-        let row1Item: TodoListItem = TodoListItem()
-        let row2Item: TodoListItem = TodoListItem()
-        let row3Item: TodoListItem = TodoListItem()
-        let row4Item: TodoListItem = TodoListItem()
+        let row0Item = TodoListItem()
+        let row1Item = TodoListItem()
+        let row2Item = TodoListItem()
+        let row3Item = TodoListItem()
+        let row4Item = TodoListItem()
 
         row0Item.text = randomTitle()
         row1Item.text = randomTitle()
@@ -36,7 +32,7 @@ class TodoList {
     }
     
     func newTodo() -> TodoListItem {
-        let newTodo: TodoListItem = TodoListItem()
+        let newTodo = TodoListItem()
         
         //Set default value in new item for .checked true (.checkmark)
         newTodo.checked = true
