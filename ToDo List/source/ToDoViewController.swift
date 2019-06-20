@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ToDoViewController: UITableViewController {
+class TodoViewController: UITableViewController {
     var todoList: TodoList
     
     //Navigator button ADD
@@ -41,13 +41,15 @@ class ToDoViewController: UITableViewController {
     
     //Make correct value for .accesoryType
     func configureCheckmark(for cell: UITableViewCell, with item: TodoListItem) {
-        let isChecked: Bool = item.checked
+        guard let checkmark = cell.viewWithTag(1001) as? UILabel else {
+            return
+        }
         
         //Change .accesoryType to opposite
-        if isChecked {
-            cell.accessoryType = .checkmark
+        if item.checked {
+            checkmark.text = "✔︎"
         } else {
-            cell.accessoryType = .none
+            checkmark.text = ""
         }
     
         //Change .checked object to opposite
@@ -97,7 +99,7 @@ class ToDoViewController: UITableViewController {
     
     //Set for swipe left->right
     override func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let complete = UIContextualAction(style: .destructive, title: "✔️") { (action, view, completion) in
+        let complete = UIContextualAction(style: .destructive, title: "Done") { (action, view, completion) in
             self.todoList.todos.remove(at: indexPath.row)
             self.tableView.deleteRows(at: [indexPath], with: .automatic)
             completion(true)
@@ -107,4 +109,44 @@ class ToDoViewController: UITableViewController {
         let action = UISwipeActionsConfiguration(actions: [complete])
         return action
     }
+    
+    //Getting correct ViewController and set it up
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "AddItemSegue" {
+            if let addItemViewController = segue.destination as? AddItemTableViewController {
+                addItemViewController.delegate = self
+                addItemViewController.todoList = todoList
+            }
+        } else if segue.identifier == "EditItemSegue" {
+            if let addItemViewController = segue.destination as? AddItemTableViewController {
+                if let cell = sender as? UITableViewCell,
+                    let indexPath = tableView.indexPath(for: cell) {
+                    let item = todoList.todos[indexPath.row]
+                    
+                    addItemViewController.itemToEdit = item
+                    addItemViewController.delegate = self
+                }
+            }
+        }
+    }
+}
+
+extension TodoViewController: AddItemViewControllerDelegate {
+    func addItemViewControllerDidCancel(_ controller: AddItemTableViewController) {
+        navigationController?.popViewController(animated: true)
+    }
+    
+    //Add new todolistitem from addItemTabViewController (2nd screen)
+    func addItemViewController(_ controller: AddItemTableViewController, didFinishAdding item: TodoListItem) {
+        let newRowIndex = todoList.todos.count
+        let indexPath = IndexPath(row: newRowIndex, section: 0)
+        let indexPaths = [indexPath]
+        
+        navigationController?.popViewController(animated: true)
+        
+        todoList.todos.append(item)
+        tableView.insertRows(at: indexPaths, with: .automatic)
+    }
+    
+    
 }
