@@ -8,14 +8,14 @@
 
 import UIKit
 
-protocol AddItemViewControllerDelegate: class {
-    func addItemViewControllerDidCancel(_ controller: AddItemTableViewController)
-    
-    func addItemViewController(_ controller: AddItemTableViewController, didFinishAdding item: TodoListItem)
+protocol ItemDetailViewControllerDelegate: class {
+    func itemDetailViewControllerDidCancel(_ controller: ItemDetailViewController)
+    func itemDetailViewController(_ controller: ItemDetailViewController, didFinishAdding item: TodoListItem)
+    func itemDetailViewController(_ controller: ItemDetailViewController, didFinishEditing item: TodoListItem)
 }
 
-class AddItemTableViewController: UITableViewController {
-    weak var delegate: AddItemViewControllerDelegate?
+class ItemDetailViewController: UITableViewController {
+    weak var delegate: ItemDetailViewControllerDelegate?
     weak var todoList: TodoList?
     weak var itemToEdit: TodoListItem?
     
@@ -30,24 +30,24 @@ class AddItemTableViewController: UITableViewController {
             textField.text = item.text
             doneBarButton.isEnabled = true
         }
-        
         navigationItem.largeTitleDisplayMode = .never
     }
     
     @IBAction func cancelButton(_ sender: Any) {
-        
-        delegate?.addItemViewControllerDidCancel(self)
+        delegate?.itemDetailViewControllerDidCancel(self)
     }
     
     @IBAction func doneButton(_ sender: Any) {
-        if let textFieldText = textField.text {
-            let newItem = TodoListItem()
-            newItem.text = textFieldText
-            
-            delegate?.addItemViewController(self, didFinishAdding: newItem)
+        if let editItem = itemToEdit, let text = textField.text {
+            editItem.text = text
+            delegate?.itemDetailViewController(self, didFinishEditing: editItem)
+        } else {
+            if let newItem = todoList?.newTodo(), let text = textField.text {
+                newItem.text = text
+                newItem.toggleChecked()
+                delegate?.itemDetailViewController(self, didFinishAdding: newItem)
+            }
         }
-        
-       
     }
     
     //Keyboard appear at display
@@ -61,7 +61,7 @@ class AddItemTableViewController: UITableViewController {
     }
 }
 
-extension AddItemTableViewController: UITextFieldDelegate {
+extension ItemDetailViewController: UITextFieldDelegate {
 //    //Keyboard hide from display after press key: Done
 //    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
 //        textField.resignFirstResponder()

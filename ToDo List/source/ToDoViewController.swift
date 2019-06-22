@@ -10,8 +10,10 @@ import UIKit
 
 class TodoViewController: UITableViewController {
     var todoList: TodoList
+    var tableData: [[TodoListItem?]?]!
     
-    //Navigator button ADD
+    
+    //Navigation button ADD
     @IBAction func addItem(_ sender: UIBarButtonItem) {
         let newRowIndex = todoList.todos.count
         _ = todoList.newTodo()
@@ -20,6 +22,22 @@ class TodoViewController: UITableViewController {
         let indexPaths = [indexPath]
 
         tableView.insertRows(at: indexPaths, with: .automatic)
+    }
+    
+    //Navigation button DELETE
+    @IBAction func deleteItems(_ sender: Any) {
+        if let selectedRows = tableView.indexPathsForSelectedRows {
+            var items = [TodoListItem]()
+            for indexPath in selectedRows {
+                items.append(todoList.todos[indexPath.row])
+            }
+            todoList.remove(items: items)
+            
+            //For more animated removing
+            tableView.beginUpdates()
+            tableView.deleteRows(at: selectedRows, with: .automatic)
+            tableView.endUpdates()
+        }
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -32,6 +50,22 @@ class TodoViewController: UITableViewController {
         
         //Set large title for navigation bar
         navigationController?.navigationBar.prefersLargeTitles = true
+        //Turn on edit left bar button
+        navigationItem.leftBarButtonItem = editButtonItem
+        //Multiple selection turn on
+        tableView.allowsMultipleSelectionDuringEditing = true
+        
+        let collation = UILocalizedIndexedCollation.current()
+        let sectionTitleCount = collation.sectionTitles.count
+        let allSections = [[TodoListItem?]?](repeating: nil, count: sectionTitleCount)
+        var sectionNumber = 0
+        
+    }
+    
+    //Set up edit navigation bar button
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: true)
+        tableView.setEditing(tableView.isEditing, animated: true)
     }
 
     //Return number of rows in section
@@ -39,26 +73,23 @@ class TodoViewController: UITableViewController {
         return todoList.todos.count
     }
     
+    func configureTextLabel(for cell: UITableViewCell, with item: TodoListItem) {
+        if let textCell = cell as? TodoTableViewCell {
+           textCell.todoTextLabel.text = item.text
+        }
+    }
+    
     //Make correct value for .accesoryType
     func configureCheckmark(for cell: UITableViewCell, with item: TodoListItem) {
-        guard let checkmark = cell.viewWithTag(1001) as? UILabel else {
+        guard let checkmarkCell = cell as? TodoTableViewCell else {
             return
         }
         
-        //Change .accesoryType to opposite
+        //Change checkmark to opposite
         if item.checked {
-            checkmark.text = "✔︎"
+            checkmarkCell.checkmarkLabel.text = "✔︎"
         } else {
-            checkmark.text = ""
-        }
-    
-        //Change .checked object to opposite
-        item.toggleChecked()
-    }
-    
-    func configureTextLabel(for cell: UITableViewCell, with item: TodoListItem) {
-        if let label = cell.viewWithTag(1000) as? UILabel {
-            label.text = item.text
+            checkmarkCell.checkmarkLabel.text = ""
         }
     }
     
@@ -68,7 +99,7 @@ class TodoViewController: UITableViewController {
         
         //Configure text labels in cell
         configureTextLabel(for: cell, with: item)
-        
+
         //Configure correct value of checkmark (.none by default)
         configureCheckmark(for: cell, with: item)
         return cell
@@ -76,8 +107,13 @@ class TodoViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if let cell = tableView.cellForRow(at: indexPath) {
+            if tableView.isEditing {
+                return
+            }
             let item: TodoListItem = todoList.todos[indexPath.row]
             
+            //Change .checked property to opposite
+            item.toggleChecked()
             //Configure correct value of checkmark (opposite)
             configureCheckmark(for: cell, with: item)
             
@@ -85,8 +121,14 @@ class TodoViewController: UITableViewController {
             tableView.deselectRow(at: indexPath, animated: true)
         }
     }
+    
+    //Setup for moving rows
+    override func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        todoList.move(item: todoList.todos[sourceIndexPath.row], at: destinationIndexPath.row)
+        tableView.reloadData()
+    }
 
-    //Set for swipe right->left
+    //Setup for swipe right->left
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         let indexPaths = [indexPath]
 
@@ -113,40 +155,47 @@ class TodoViewController: UITableViewController {
     //Getting correct ViewController and set it up
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "AddItemSegue" {
-            if let addItemViewController = segue.destination as? AddItemTableViewController {
-                addItemViewController.delegate = self
-                addItemViewController.todoList = todoList
+            if let itemDetailViewController = segue.destination as? ItemDetailViewController {
+                itemDetailViewController.delegate = self
+                itemDetailViewController.todoList = todoList
             }
         } else if segue.identifier == "EditItemSegue" {
-            if let addItemViewController = segue.destination as? AddItemTableViewController {
+            if let itemDetailViewController = segue.destination as? ItemDetailViewController {
                 if let cell = sender as? UITableViewCell,
                     let indexPath = tableView.indexPath(for: cell) {
                     let item = todoList.todos[indexPath.row]
                     
-                    addItemViewController.itemToEdit = item
-                    addItemViewController.delegate = self
+                    itemDetailViewController.delegate = self
+                    itemDetailViewController.itemToEdit = item
                 }
             }
         }
     }
 }
 
-extension TodoViewController: AddItemViewControllerDelegate {
-    func addItemViewControllerDidCancel(_ controller: AddItemTableViewController) {
+extension TodoViewController: ItemDetailViewControllerDelegate {
+    func itemDetailViewControllerDidCancel(_ controller: ItemDetailViewController) {
         navigationController?.popViewController(animated: true)
     }
     
     //Add new todolistitem from addItemTabViewController (2nd screen)
-    func addItemViewController(_ controller: AddItemTableViewController, didFinishAdding item: TodoListItem) {
-        let newRowIndex = todoList.todos.count
+    func itemDetailViewController(_ controller: ItemDetailViewController, didFinishAdding item: TodoListItem) {
+        navigationController?.popViewController(animated: true)
+        let newRowIndex = todoList.todos.count - 1
         let indexPath = IndexPath(row: newRowIndex, section: 0)
         let indexPaths = [indexPath]
-        
-        navigationController?.popViewController(animated: true)
-        
-        todoList.todos.append(item)
+
         tableView.insertRows(at: indexPaths, with: .automatic)
     }
     
-    
+    //Edit todolistitem from addItemTabViewController (2nd screen)
+    func itemDetailViewController(_ controller: ItemDetailViewController, didFinishEditing item: TodoListItem) {
+        navigationController?.popViewController(animated: true)
+        if let index = todoList.todos.firstIndex(of: item) {
+            let indexPath = IndexPath(row: index, section: 0)
+            if let cell = tableView.cellForRow(at: indexPath) {
+                configureTextLabel(for: cell, with: item)
+            }
+        }
+    }
 }

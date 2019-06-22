@@ -31,6 +31,7 @@ class TodoList {
         todos.append(row4Item)
     }
     
+    //Creating new todo item
     func newTodo() -> TodoListItem {
         let newTodo = TodoListItem()
         
@@ -39,6 +40,24 @@ class TodoList {
         newTodo.text = randomTitle()
         todos.append(newTodo)
         return newTodo
+    }
+    
+    //Moving todo item to particular index
+    func move(item: TodoListItem, at index: Int) {
+        guard let currentIndex = todos.firstIndex(of: item) else {
+            return
+        }
+        todos.insert(item, at: index)
+        todos.remove(at: currentIndex)
+    }
+    
+    //Remove multiple items
+    func remove(items: [TodoListItem]) {
+        for item in items {
+            if let index = items.firstIndex(of: item) {
+                todos.remove(at: index)
+            }
+        }
     }
     
     //Generate random text title

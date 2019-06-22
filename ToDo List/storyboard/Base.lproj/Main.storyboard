@@ -18,7 +18,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="detailButton" indentationWidth="10" reuseIdentifier="ToDoItem" id="xSp-x0-1lt">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="detailButton" indentationWidth="10" reuseIdentifier="ToDoItem" id="xSp-x0-1lt" customClass="TodoTableViewCell" customModule="ToDo_List" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="28" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="xSp-x0-1lt" id="Mut-5v-Uhu">
@@ -58,6 +58,8 @@
                                     </constraints>
                                 </tableViewCellContentView>
                                 <connections>
+                                    <outlet property="checkmarkLabel" destination="Yac-3O-QUv" id="ll6-YE-ttI"/>
+                                    <outlet property="todoTextLabel" destination="ctH-sO-khZ" id="Mwz-Vf-n6f"/>
                                     <segue destination="kRp-IJ-5om" kind="show" identifier="EditItemSegue" trigger="accessoryAction" id="ZYH-yO-Rzg"/>
                                 </connections>
                             </tableViewCell>
@@ -68,11 +70,18 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="ToDo List" id="OSt-v9-mMH">
-                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="IKb-PZ-SMJ">
-                            <connections>
-                                <segue destination="kRp-IJ-5om" kind="show" identifier="AddItemSegue" id="8aN-Am-Mgw"/>
-                            </connections>
-                        </barButtonItem>
+                        <rightBarButtonItems>
+                            <barButtonItem systemItem="add" id="IKb-PZ-SMJ">
+                                <connections>
+                                    <segue destination="kRp-IJ-5om" kind="show" identifier="AddItemSegue" id="8aN-Am-Mgw"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem title="Delete" id="TdB-f1-XbE">
+                                <connections>
+                                    <action selector="deleteItems:" destination="GkI-81-yp6" id="iub-SM-hEd"/>
+                                </connections>
+                            </barButtonItem>
+                        </rightBarButtonItems>
                     </navigationItem>
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                 </tableViewController>
@@ -83,7 +92,7 @@
         <!--Add-->
         <scene sceneID="4CS-CM-RJs">
             <objects>
-                <tableViewController clearsSelectionOnViewWillAppear="NO" id="kRp-IJ-5om" customClass="AddItemTableViewController" customModule="ToDo_List" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController clearsSelectionOnViewWillAppear="NO" id="kRp-IJ-5om" customClass="ItemDetailViewController" customModule="ToDo_List" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="O0S-KO-ddv">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -98,9 +107,8 @@
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <textField opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="natural" adjustsFontSizeToFit="NO" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="1kb-Wu-rma">
-                                                    <rect key="frame" x="16" y="5" width="343" height="33"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="natural" adjustsFontSizeToFit="NO" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="1kb-Wu-rma">
+                                                    <rect key="frame" x="16" y="11.5" width="343" height="21"/>
                                                     <nil key="textColor"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <textInputTraits key="textInputTraits" autocapitalizationType="sentences" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
@@ -110,6 +118,14 @@
                                                     </connections>
                                                 </textField>
                                             </subviews>
+                                            <constraints>
+                                                <constraint firstItem="1kb-Wu-rma" firstAttribute="centerY" secondItem="3jn-lA-E07" secondAttribute="centerY" id="AYH-Ff-NC7"/>
+                                                <constraint firstItem="1kb-Wu-rma" firstAttribute="centerX" secondItem="3jn-lA-E07" secondAttribute="centerX" id="IHQ-JT-ldT"/>
+                                                <constraint firstAttribute="trailing" secondItem="1kb-Wu-rma" secondAttribute="trailing" constant="16" id="Teb-4a-BWC"/>
+                                                <constraint firstItem="1kb-Wu-rma" firstAttribute="centerY" secondItem="3jn-lA-E07" secondAttribute="centerY" id="W1x-02-jrB"/>
+                                                <constraint firstItem="1kb-Wu-rma" firstAttribute="leading" secondItem="3jn-lA-E07" secondAttribute="leading" constant="16" id="dsL-w1-MvJ"/>
+                                                <constraint firstItem="1kb-Wu-rma" firstAttribute="centerX" secondItem="3jn-lA-E07" secondAttribute="centerX" id="dzg-Tm-dmG"/>
+                                            </constraints>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                 </cells>
