@@ -57,9 +57,16 @@ class TodoViewController: UITableViewController {
         
         let collation = UILocalizedIndexedCollation.current()
         let sectionTitleCount = collation.sectionTitles.count
-        let allSections = [[TodoListItem?]?](repeating: nil, count: sectionTitleCount)
-        var sectionNumber = 0
-        
+        var allSections = [[TodoListItem?]?](repeating: nil, count: sectionTitleCount)
+        var sectionNumber: Int = 0
+        for item in todoList.todos {
+            sectionNumber = collation.section(for: item, collationStringSelector: #selector(getter: TodoListItem.text))
+            if allSections[sectionNumber] == nil {
+                allSections[sectionNumber] = [TodoListItem?]()
+            }
+            allSections[sectionNumber]!.append(item)
+        }
+        tableData = allSections
     }
     
     //Set up edit navigation bar button
@@ -70,7 +77,7 @@ class TodoViewController: UITableViewController {
 
     //Return number of rows in section
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return todoList.todos.count
+        return tableData[section] == nil ? 0 : tableData[section]!.count
     }
     
     func configureTextLabel(for cell: UITableViewCell, with item: TodoListItem) {
@@ -95,13 +102,14 @@ class TodoViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItem", for: indexPath)
-        let item: TodoListItem = todoList.todos[indexPath.row]
-        
-        //Configure text labels in cell
-        configureTextLabel(for: cell, with: item)
-
-        //Configure correct value of checkmark (.none by default)
-        configureCheckmark(for: cell, with: item)
+        //let item: TodoListItem = todoList.todos[indexPath.row]
+        if let item = tableData[indexPath.section]?[indexPath.row] {
+            //Configure text labels in cell
+            configureTextLabel(for: cell, with: item)
+            
+            //Configure correct value of checkmark (.none by default)
+            configureCheckmark(for: cell, with: item)
+        }
         return cell
     }
     
@@ -170,6 +178,22 @@ class TodoViewController: UITableViewController {
                 }
             }
         }
+    }
+    
+    override func numberOfSections(in tableView: UITableView) -> Int {
+        return tableData.count
+    }
+    
+    override func sectionIndexTitles(for tableView: UITableView) -> [String]? {
+        return UILocalizedIndexedCollation.current().sectionTitles
+    }
+    
+    override func tableView(_ tableView: UITableView, sectionForSectionIndexTitle title: String, at index: Int) -> Int {
+        return UILocalizedIndexedCollation.current().section(forSectionIndexTitle: index)
+    }
+    
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return UILocalizedIndexedCollation.current().sectionTitles[section]
     }
 }
 

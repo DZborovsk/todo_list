@@ -9,7 +9,7 @@
 import Foundation
 
 class TodoListItem: NSObject {
-    var text: String = ""
+    @objc var text: String = ""
     //Default value is FALSE because .accesoryType is `.none` by default
     var checked: Bool = false
     
